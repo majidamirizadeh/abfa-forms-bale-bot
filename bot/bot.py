@@ -1,12 +1,9 @@
 from bale import Bot, Message
-from config import TOKEN
-import requests
+from config import BALE_TOKEN
 
-
-bot = Bot(TOKEN)
+bot = Bot(token=BALE_TOKEN)
 
 GITHUB_RAW = "https://raw.githubusercontent.com/majidamirizadeh/abfa-forms-bale-bot/main/"
-
 
 folders = {
     "1": ("دفتر درآمد مشترکین", "forms/daramad"),
@@ -14,7 +11,6 @@ folders = {
     "3": ("دفتر خدمات مشترکین", "forms/khadamat"),
     "4": ("دفتر حسابداری مشترکین", "forms/hesabdari"),
 }
-
 
 menu = """
 📂 انتخاب دفتر:
@@ -25,39 +21,26 @@ menu = """
 4️⃣ دفتر حسابداری مشترکین
 """
 
-
 @bot.event
 async def on_ready():
-    print("ربات فعال شد")
-
+    print("ربات فعال شد ✅")
 
 @bot.event
 async def on_message(message: Message):
+    if not message.text:
+        return
 
-    if message.text == "/start":
+    text = message.text.strip()
+
+    if text == "/start":
         await message.reply(menu)
         return
 
+    if text in folders:
+        name, path = folders[text]
+        await message.reply(f"📁 {name}\n\nدر حال ارسال فرم آزمایشی...")
 
-    if message.text in folders:
-
-        name, path = folders[message.text]
-
-        await message.reply(
-            f"📁 {name}\n\n"
-            "فرم‌ها آماده ارسال هستند."
-        )
-
-        # فعلا تستی
         pdf_url = GITHUB_RAW + path + "/test.pdf"
-
-        await message.reply(
-            "در حال ارسال فایل..."
-        )
-
-        await message.send_document(
-            pdf_url
-        )
-
+        await message.reply_document(document=pdf_url)
 
 bot.run()
