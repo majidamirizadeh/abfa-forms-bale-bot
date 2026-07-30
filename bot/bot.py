@@ -1,46 +1,63 @@
+from bale import Bot, Message
+from config import TOKEN
 import requests
-from config import BALE_TOKEN
-
-API = f"https://tapi.bale.ai/bot{BALE_TOKEN}/"
-
-def send_message(chat_id, text):
-    requests.post(
-        API + "sendMessage",
-        json={
-            "chat_id": chat_id,
-            "text": text
-        }
-    )
 
 
-def get_updates():
-    r = requests.get(API + "getUpdates")
-    return r.json()
+bot = Bot(TOKEN)
+
+GITHUB_RAW = "https://raw.githubusercontent.com/majidamirizadeh/abfa-forms-bale-bot/main/"
 
 
-print("ربات فرم‌های آبفا فعال شد")
+folders = {
+    "1": ("دفتر درآمد مشترکین", "forms/daramad"),
+    "2": ("دفتر بازرسی مشترکین", "forms/bazrasi"),
+    "3": ("دفتر خدمات مشترکین", "forms/khadamat"),
+    "4": ("دفتر حسابداری مشترکین", "forms/hesabdari"),
+}
 
-while True:
-    data = get_updates()
 
-    if "result" in data:
-        for item in data["result"]:
-            try:
-                message = item["message"]
-                chat_id = message["chat"]["id"]
-                text = message.get("text", "")
-
-                if text == "/start":
-                    send_message(
-                        chat_id,
-                        """سلام 👋
-فرم مورد نیاز خود را انتخاب کنید:
+menu = """
+📂 انتخاب دفتر:
 
 1️⃣ دفتر درآمد مشترکین
 2️⃣ دفتر بازرسی مشترکین
 3️⃣ دفتر خدمات مشترکین
-4️⃣ دفتر حسابداری مشترکین"""
-                    )
+4️⃣ دفتر حسابداری مشترکین
+"""
 
-            except Exception:
-                pass
+
+@bot.event
+async def on_ready():
+    print("ربات فعال شد")
+
+
+@bot.event
+async def on_message(message: Message):
+
+    if message.text == "/start":
+        await message.reply(menu)
+        return
+
+
+    if message.text in folders:
+
+        name, path = folders[message.text]
+
+        await message.reply(
+            f"📁 {name}\n\n"
+            "فرم‌ها آماده ارسال هستند."
+        )
+
+        # فعلا تستی
+        pdf_url = GITHUB_RAW + path + "/test.pdf"
+
+        await message.reply(
+            "در حال ارسال فایل..."
+        )
+
+        await message.send_document(
+            pdf_url
+        )
+
+
+bot.run()
