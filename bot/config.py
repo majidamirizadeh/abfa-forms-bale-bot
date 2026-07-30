@@ -1,1 +1,1 @@
-BALE_TOKEN = "توکن_ربات_بله_اینجا"
+BALE_TOKEN = "330871806:wj4tWpWnwZZzUgE4MD4CMJKyZEWQpAceOAM"
